@@ -45,12 +45,12 @@ class JingDong(object):
 
     def get_comment(self, s, ids):
         # 好评数
-        r_comment = s.get(self.good_url.format(ids))
+        r_comment = s.get(self.good_url.format(ids), headers={'user-agent': self.user_agent})
         # 好评类型
         self.header['referer'] = 'https://item.jd.com/{}.html'.format(ids)
         # 访问频率过快会导致采集不到评论特点，这里最好加上随机 proxies
         r_comment_type = s.get(self.comments_type.format(ids), headers=self.header)
-        comment_num = re.findall(r'"CommentCount":(\d+),', r_comment.text, re.S)
+        comment_num = re.findall(r'"CommentCountStr":"(.*?)",', r_comment.text, re.S)
         if comment_num:
             comment_num = comment_num[0]
         comment_type = re.findall(r'\"hotCommentTagStatistics\":\[(.*?)\]', r_comment_type.text, re.S)
@@ -62,7 +62,7 @@ class JingDong(object):
         return comment_num, comment_types
 
     def get_more_infos(self, s, pid, url, name):
-        r_formats = s.get(url)
+        r_formats = s.get(url, headers={'user-agent': self.user_agent})
         cat_vid = re.findall(r'cat: \[(.*?)],.*?venderId:(.*?),', r_formats.text, re.S)
         if cat_vid[0]:
             cat, vid = cat_vid[0][0], cat_vid[0][1]
@@ -76,13 +76,13 @@ class JingDong(object):
                 #     price = ''
                 #     ref_price = ref_prices[0][1]
             comment_num, comment_types = self.get_comment(s, pid)
-            # print(pid, url, price, ref_price, name, comment_num, comment_types)
-            self.insertmysql(pid, url, price, ref_price, name, comment_num, comment_types)
+            print(pid, url, price, ref_price, name, comment_num, comment_types)
+            # self.insertmysql(pid, url, price, ref_price, name, comment_num, comment_types)
 
     def get_goods_info(self, s, page, r):
         print(page)
         # 一页30个手机
-        info_list = re.findall(r'<li class="gl-item" data-sku="(.*?)".*?>.*?<div class="p-price">(.*?)</div>'
+        info_list = re.findall(r'<li data-sku="(.*?)".*?>.*?<div class="p-price">(.*?)</div>'
                                r'.*?<em>(.*?)</em>.*?<a id="J_comment_.*?>.*?</a>.*?</li>', r.text, re.S)
         for infos in info_list:
             # 每一个手机

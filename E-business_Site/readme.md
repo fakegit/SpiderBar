@@ -21,6 +21,24 @@ https://c0.3.cn/stock?skuId={}&area=15_1158_46343_0&venderId={}&cat={}'
 r'"jdPrice":{.*?"p":"(.*?)".*?"op":"(.*?)".*?}'
 ```
 
+### 2021-02-25
+
+更新规则改变，商品列表页面源代码中带有商品ID的标签的修改
+
+```
+class="gl-item" data-sku= 替换成 data-sku=
+```
+
+修改获取商品评论数的正则字段
+
+```
+"CommentCount" 替换为 "CommentCountStr"
+```
+
+此外，所有get请求时需要在请求头带上user-agent字段，否则无法获得返回的页面数据
+
+
+
 **jingdong_camera.py**
 
 之前根据人家提出的具体需求做的爬取京东单反相机数据的脚本
